@@ -5,6 +5,7 @@ institute: "Universidade Federal de São Carlos"
 date: "10/06/2022"
 output:
   xaringan::moon_reader:
+    chakra: libs/remark-latest.min.js  
     css: xaringan-themer.css
     lib_dir: libs
     nature:
@@ -15,13 +16,14 @@ output:
       countIncrementalSlides: true
 ---
 
-background-image: url(https://upload.wikimedia.org/wikipedia/commons/b/be/Sharingan_triple.svg)
-
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(
-  fig.width=9, fig.height=3.5, fig.retina=3,
-  out.width = "100%",
+  fig.align = "center",
+  fig.height = 4, 
+  out.height = "60%",
+  out.width = "60%",
+  dpi = 500,
   cache = FALSE,
   echo = TRUE,
   message = FALSE, 
@@ -38,95 +40,803 @@ style_mono_accent(
   text_font_google   = google_font("Montserrat", "300", "300i"),
   code_font_google   = google_font("Fira Mono")
 )
+library(tidyverse)
 ```
 
 
-???
+# O que é o Tidyverse?
 
-Image credit: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sharingan_triple.svg)
+--
+
+- O `{tidyverse}` é um conjunto de pacotes para ciência de dados.
+
+--
+
+- Fazem parte do `{tidyverse}`: `{ggplot2}`, `{dplyr}`, `{tidyr}`, `{purrr}`, `{readr}`, e assim vai...
+
+--
+<center>
+<img src="https://miro.medium.com/max/917/0*OY7eFSIP42EiNXED" width="300px">
+</center>
+
+--
+
+- Pacotes com mesma sintaxe e estilo de programar, usados em conjunto
+
+--
+
+- Seguem o *manifesto tidy* e trabalham em torno de *bases tidy*
 
 ---
-class: center, middle
+## Manifesto tidy
+1. Reutilizar estruturas de dados existentes
 
-# xaringan
+2. Organizar funções simples usando o pipe (%>%)
 
-### /ʃaː.'riŋ.ɡan/
+3. Aderir à programação funcional
+
+4. Projetado para ser usado por seres humanos.
+
+--
+
+## Base tidy
+- Base onde é possível trabalhar com dados de uma maneira simples e eficiente
+  - Cada coluna representa uma variável
+  
+  - Cada linha uma observação
+  
+  - Cada cédula um único valor
+
+
+---
+class: middle
+## Resumão do que alguns pacotes fazem
+
+.pull-left[
+<div class='flex-favicon'>
+<img src="https://d33wubrfki0l68.cloudfront.net/c1c91484f898fe9d7d90a570900f1d5cd703fe2e/d7df4/css/images/hex/readr.png" width="85px" float='left'>
+<div style="display:inline-block;">
+<p>{readr}: Ler dados em formato tabular </p></div>
+</div>
+
+<div class='flex-favicon'>
+<img src="https://d33wubrfki0l68.cloudfront.net/476fa4025501dcec05be08248b32d390dd2337d5/574c6/css/images/hex/tidyr.png" width="85px" float='left'>
+<div style="display:inline-block;">
+<p>{tidyr}: Arrumar e padronizar dados</p></div>
+</div>
+
+<div class='flex-favicon'>
+<img src="https://d33wubrfki0l68.cloudfront.net/621a9c8c5d7b47c4b6d72e8f01f28d14310e8370/193fc/css/images/hex/dplyr.png" width="85px" float='left'>
+<div style="display:inline-block;">
+<p>{dplyr}: transformar dados</p></div>
+</div>
+
+<div class='flex-favicon'>
+<img src="https://d33wubrfki0l68.cloudfront.net/2c6239d311be6d037c251c71c3902792f8c4ddd2/12f67/css/images/hex/ggplot2.png" width="85px" float='left'>
+<div style="display:inline-block;">
+<p>{ggplot2}: criar gráficos</p></div>
+</div>
+]
+
+.pull-right[
+<div class='flex-favicon'>
+<img src="https://d33wubrfki0l68.cloudfront.net/2d0701b616efa7435cd5a94e703baa595a4f9ed0/d41b9/css/images/hex/purrr.png" width="85px" float='left'>
+<div style="display:inline-block;">
+<p>{purrr}: Programação funcional</p></div>
+</div>
+
+
+<div class='flex-favicon'>
+<img src="https://d33wubrfki0l68.cloudfront.net/45fd04ad9cdb2159fea08d07dbc11e742d68e4e3/df327/css/images/hex/stringr.png" width="85px" float='left'>
+<div style="display:inline-block;">
+<p>{stringr}: Lidar com strings</p></div>
+</div>
+
+<div class='flex-favicon'>
+<img src="https://d33wubrfki0l68.cloudfront.net/412a6f14518ab633a94221dda7e16cf22e43a763/91620/css/images/hex/forcats.png" width="85px" float='left'>
+<div style="display:inline-block;">
+<p>{forcats}: Lidar com fatores</p></div>
+</div>
+
+<div class='flex-favicon'>
+<img src="https://d33wubrfki0l68.cloudfront.net/c477d7eb7fdf2c3d75637cfe19ff4a4d0a107bcf/017d0/css/images/hex/tibble.png" width="85px" float='left'>
+<div style="display:inline-block;">
+<p>{tibble}: Data frames repaginados </p></div>
+</div>
+]
+---
+class: inverse, center, middle
+
+# Pacotes preliminares
+
+
+---
+# Tibbles
+
+- Tibbles são praticamente data.frames com melhorias na visualização pelo console
+
+--
+
+- São usadas em diversas funções e pacotes do `tidyverse`, principalmente pelos pacotes `dplyr` e `tidyr`
+
+--
+
+.pull-left[
+- Data-frame padrão
+```{r}
+mtcars[, 1:6]
+```
+]
+.pull-right[
+- Tibble
+```{r}
+as_tibble(mtcars[, 1:6])
+```
+]
+
+---
+# Operador Pipe
+
+- Torna a escrita e leitura de códigos mais intuitiva
+
+- Funções do tidyverse foram projetadas para serem usadas com o pipe %>%
+
+- Ideia do pipe: usar o valor resultante da expressão do lado esquerdo como primeiro argumento da função do lado direito.
+
+```{r eval = FALSE}
+# expressoes equivalentes
+f(x, y)
+x %>% f(y)
+```
+
+---
+# Exemplinhos
+- Vamos calcular a raiz quadrada da soma de um vetor ***x = c(1, 2, 3, 4)***:
+
+--
+```{r}
+# sem pipe
+x <- c(1, 2, 3, 4)
+sqrt(sum(x))
+```
+
+--
+```{r}
+# com pipe
+x %>% sum() %>% sqrt()
+```
+
+---
+# Exemplinhos
+- Ajustando um modelo linear no banco de dados `airquality`:
+
+```{r}
+# resultado do lado esquerdo indo para outro argumento do lado direito que não o primerio
+airquality %>%
+  na.omit() %>%
+  lm(Ozone ~ Wind + Temp + Solar.R, data = .)
+```
+---
+class: inverse, center, middle
+
+# Dplyr e tidyr
+
+---
+# Dplyr
+- Pacote muito úti, fácil e versatil de se usar para transformação de dados
+
+- Diversas funções que podem ser combinadas e encadeadas pelo pipe `%>%`
+
+- Principais funções:
+  - `select()`: seleciona colunas
+  - `arrange()`: ordena a base de dados
+  - `filter()`: filtra linhas
+  - `mutate()`: cria/modifica colunas
+  - `group_by()`: agrupa a base de dados de acordo com certa(s) variável(eis)
+  - `summarise()`: sumariza a base de dados
+  
+- Características dessas funções:
+  - O input o output são sempre uma tibble.
+  - Tibble vai no primeiro argumento das funções e o que queremos fazer nos outros argumentos.
+  - A utilização é facilitada com o emprego do operador %>%.
+
+---
+# Dados
+Vamos usar o banco de dados iris para ilustrar as funções do `dplyr`:
+```{r}
+# transformando antes para tibble
+iris <- as_tibble(iris) %>% rowid_to_column()
+iris
+```
+
+---
+# Selecionando colunas
+
+- Usando a função `select()`
+- Primeiro argumento é a base e os demais são as variáveis a serem selecionadas
+.pull-left[
+Selecionando uma coluna:
+```{r}
+iris %>% select(Sepal.Length)
+```
+]
+.pull-right[
+Selecionando mais de uma:
+```{r}
+# iris %>% select(1,2)
+iris %>% select(Sepal.Length, Sepal.Width)
+```
+]
+
+---
+# Selecionando colunas
+
+Selecionando um intervalo de variaveis
+```{r}
+iris %>% select(Sepal.Length:Petal.Length)
+```
+
+---
+# Selecionando colunas
+
+Também podemos remover variaveis:
+```{r}
+iris %>% select(-Sepal.Length)
+```
+
+---
+# Selecionando colunas
+
+Algumas funções suplementares que ajudam na seleção de variáveis:
+
+  * `starts_with()`: colunas que começam com um prefixo
+  
+  * `ends_with()`: colunas que terminam com um sufixo
+  
+  * `contains()`: colunas que contêm uma string
+  
+  * `last_col()`: última coluna
+  
+```{r}
+iris %>% select(starts_with("Petal"))
+```
+---
+# Ordenando a base
+
+- Com `arrange()`ordenamos as linhas de acordo com alguma variável de interesse:
+
+  - Variável categórica: ordena por ordem alfabética
+  
+  - Variável numérica: ordena do menor para o maior
+  
+  - Varíavel fator: ordena pelos níveis do fator
+  
+  
+```{r}
+iris %>% arrange(Sepal.Length)
+```
+
+---
+# Ordenando a base
+
+Ordenando de forma decrescente
+```{r}
+iris %>% arrange(desc(Sepal.Length))
+```
+
+---
+# Ordenando a base
+
+Ordenando por mais de uma variável
+```{r}
+iris %>% arrange(Species, Sepal.Length)
+```
+
+---
+# Filtrando linhas
+- Usamos `filter()` para selecionar as linhas de acordo com certa condição (filtro)
+
+```{r}
+iris %>% filter(Sepal.Length > 6)
+```
+
+---
+# Filtrando linhas
+- Combinando filter, select e arrange para analisar os individuos que tem tamanho de sépala maior que 6:
+```{r}
+iris %>% filter(Sepal.Length > 6) %>%
+  select(rowid, Sepal.Length) %>%
+  arrange(desc(Sepal.Length))
+```
+---
+# Filtrando linhas
+- Filtrando por mais de uma condição
+```{r}
+iris %>% filter(Sepal.Length > 6, Species == "versicolor")
+```
+
+---
+# Filtrando linhas
+
+- Filtrando por mais de uma categoria
+```{r}
+iris %>% filter(Species %in% c("setosa", "versicolor"))
+```
+---
+# Modificando colunas
+
+- Função `mutate()` para criar e modificar colunas
+
+- Primeiro modificando:
+```{r}
+iris %>%
+  mutate(
+    Sepal.Length = Sepal.Length*10, 
+    Petal.Length = Petal.Length*10
+  )
+```
+
+---
+# Modificando colunas
+- Criando colunas:
+```{r}
+iris %>% 
+  mutate(
+    Sepal.Length_mm = Sepal.Length*10, 
+    Petal.Length_mm = Petal.Length*10
+  )
+```
+---
+# Sumarizando a base
+
+- Pela função `summarise()` podemos resumir nossa base para alguma métrica de interesse
+- Média, mediana, desvio padrão, etc.
+- Podemos fazer isso para um ou mais colunas de interesse
+
+```{r}
+# media e desvio padrao do Sepal.Length
+iris %>% 
+  summarise(
+    media_sepal_lenght = mean(Sepal.Length),
+    sd_sepal_lenght = sd(Sepal.Length),
+    media_sepal_width = mean(Sepal.Width),
+    sd_sepal_width = sd(Sepal.Width),
+    n = n()
+  )
+```
+
+
+---
+# Sumarizando a base
+
+- Podemos juntar o `summarise()` com o `group_by()` para tratar cada grupo como se fosse uma base de dados diferente.
+
+- Isso também é válido para o `mutate()`.
+
+```{r}
+iris %>% 
+  group_by(Species) %>% 
+  summarise(
+    media_sepal_lenght = mean(Sepal.Length),
+    sd_sepal_lenght = sd(Sepal.Length),
+    media_sepal_width = mean(Sepal.Width),
+    sd_sepal_width = sd(Sepal.Width),
+    n = n()
+  )
+```
+
+---
+# Outras funções do dplyr
+
+- `accross()`: facilita aplicar uma mesma operação em várias colunas.
+
+- `rowwise()`: operações por linha.
+
+- `relocate()`: reposicionar colunas
+
 
 ---
 class: inverse, center, middle
 
-# Get Started
+# Tidyr
 
 ---
+#Tidyr
+- Bom pacote para transformar bases bagunçadas em bases *tidy*
 
-# Hello World
+- Também usado para modificar a estrutura dos dados (pivotagem)
 
-Install the **xaringan** package from [Github](https://github.com/yihui/xaringan):
+- Principais funções:
 
-```{r eval=FALSE, tidy=FALSE}
-remotes::install_github("yihui/xaringan")
+  -`separate()` e `unite()`:para separar variáveis concatenadas em uma única coluna ou uni-las.
+  
+  - `pivot_wider()` e `pivot_longer()`: para pivotar a base.
+  
+---
+# `separate()`e `unite()`
+
+- Função `separate()`: separa duas ou mais variáveis que estão concatenadas em uma mesma coluna:
+```{r eval = FALSE}
+dados %>% 
+  separate( 
+    col = coluna_velha, 
+    into = c("colunas", "novas"),
+    sep = "separador"
+  )
 ```
 
+- Função `unite()`: concatena os valores de várias variáveis em uma única coluna:
+```{r eval = FALSE}
+dados %>% 
+  unite(
+    col = coluna_nova, 
+    colunas_para_juntar, 
+    sep = "separador" 
+  )
+```
+
+---
+# Pivotagem
+
+- `pivot_longer()`: alonga/empilha os dados:
+```{r}
+iris_longer <- iris %>% 
+  pivot_longer(c(-Species, -rowid), names_to = "partes", values_to = "medidas")
+iris_longer
+```
+
+---
+# Pivotagem
+
+- `pivot_wider()`: alarga/espalha os dados:
+```{r}
+iris_longer %>% 
+  pivot_wider(id_cols = rowid, names_from = partes, values_from = medidas)
+```
+---
+class: inverse, center, middle
+
+# Ggplot
+
+---
+# Ggplot2
+- Fruto da tese de doutorado de Hadley Wickham
+
 --
 
-You are recommended to use the [RStudio IDE](https://www.rstudio.com/products/rstudio/), but you do not have to.
-
-- Create a new R Markdown document from the menu `File -> New File -> R Markdown -> From Template -> Ninja Presentation`;<sup>1</sup>
+- `Gráfico estatístico`
 
 --
 
-- Click the `Knit` button to compile it;
+- Elementos de um gráfico são as suas camadas
 
 --
 
-- or use the [RStudio Addin](https://rstudio.github.io/rstudioaddins/)<sup>2</sup> "Infinite Moon Reader" to live preview the slides (every time you update and save the Rmd document, the slides will be automatically reloaded in RStudio Viewer.
+- Construção de um gráfico se dá pela sobreposição dessas camadas.
 
-.footnote[
-[1] 中文用户请看[这份教程](https://slides.yihui.org/xaringan/zh-CN.html)
+--
 
-[2] See [#2](https://github.com/yihui/xaringan/issues/2) if you do not see the template or addin in RStudio.
-]
+- `{ggplot2}`: Construir um gráfico camada por camada
 
----
-background-image: url(`r xaringan:::karl`)
-background-position: 50% 50%
-class: center, bottom, inverse
+--
+## Vantagens sobre o R-base
 
-# You only live once!
+- Gráficos mais bonitos
 
----
+--
 
-# Hello Ninja
+- Fácil personalização
 
-As a presentation ninja, you certainly should not be satisfied by the "Hello World" example. You need to understand more about two things:
+--
 
-1. The [remark.js](https://remarkjs.com) library;
+- Aprendizado intuitivo
 
-1. The **xaringan** package;
+--
 
-Basically **xaringan** injected the chakra of R Markdown (minus Pandoc) into **remark.js**. The slides are rendered by remark.js in the web browser, and the Markdown source needed by remark.js is generated from R Markdown (**knitr**).
+- Diferença no código entre tipos de gráficos diferentes é pequena
 
 ---
+# Primeira camada
 
-# remark.js
-
-You can see an introduction of remark.js from [its homepage](https://remarkjs.com). You should read the [remark.js Wiki](https://github.com/gnab/remark/wiki) at least once to know how to
-
-- create a new slide (Markdown syntax<sup>*</sup> and slide properties);
-
-- format a slide (e.g. text alignment);
-
-- configure the slideshow;
-
-- and use the presentation (keyboard shortcuts).
-
-It is important to be familiar with remark.js before you can understand the options in **xaringan**.
-
-.footnote[[*] It is different with Pandoc's Markdown! It is limited but should be enough for presentation purposes. Come on... You do not need a slide for the Table of Contents! Well, the Markdown support in remark.js [may be improved](https://github.com/gnab/remark/issues/142) in the future.]
+- A primeira camada é dado pela função `ggplot()`
+```{r}
+ggplot(data = iris)
+```
 
 ---
-background-image: url(`r xaringan:::karl`)
-background-size: cover
-class: center, bottom, inverse
+# Gráfico de pontos
 
-# I was so happy to have discovered remark.js!
+- Precisamos especificar como as observações serão mapeadas no gráfico
+
+- Especificar quais formas geométricas serão utilizadas
+
+```{r}
+ggplot(iris) +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))
+```
+---
+# Gráfico de pontos
+- Adicionando uma reta $y = -6 + 1.5x$
+
+```{r}
+ggplot(iris) +
+  geom_abline(intercept = -6, slope = 1.5, color = "red") +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))
+```
+
+---
+# Gráfico de pontos
+- Mapear a cor dos pontos de acordo com outra variável
+```{r}
+# variavel continua
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width, color = Petal.Width))
+```
+---
+# Gráfico de pontos
+- Para fator/variável categórica
+```{r}
+# fator
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width, color = Species))
+```
+
+---
+# Gráfico de pontos
+- Única cor para tudo
+```{r}
+# fator
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width), color = "blue")
+```
+---
+# Gráfico de barras
+
+- Criando nova categoria para ser plotada
+
+```{r}
+# frequencia de categorias de comprimento de sepalas e petalas
+iris_novo <- iris %>% 
+  mutate(Sepal_cat = case_when(Sepal.Length < 5~ "Menor que 5",
+                   Sepal.Length >= 5 & Sepal.Length < 6 ~ "Maior que 5, menor que 6",
+                   Sepal.Length >= 6 ~ "Maior/igual a 6"))
+```
+
+---
+# Gráfico de barras
+
+- Devemos mudar a forma geométrica que queremos representar
+```{r}
+iris_novo %>%
+  count(Sepal_cat) %>%
+  ggplot() +
+  geom_col(aes(x = Sepal_cat, y = n))
+```
+
+---
+# Gráfico de barras
+
+- Preencher barras de acordo com a categoria
+
+```{r}
+iris_novo %>%
+  count(Sepal_cat) %>%
+  ggplot() +
+  geom_col(aes(x = Sepal_cat, y = n, fill = Sepal_cat), show.legend = FALSE)
+```
+
+---
+# Gráfico de barras
+
+- Inverter gráfico de barras
+
+```{r}
+iris_novo %>%
+  count(Sepal_cat) %>%
+  ggplot() +
+  geom_col(aes(y = Sepal_cat, x = n, fill = Sepal_cat), show.legend = FALSE)
+```
+
+---
+# Gráfico de barras
+
+- Colocando número da frequência em cada barra
+```{r out.height = "50%", out.width = "50%"}
+iris_novo %>%
+  count(Sepal_cat) %>% ggplot() +
+  geom_col(aes(x = Sepal_cat, y = n, fill = Sepal_cat), show.legend = FALSE) +
+  geom_label(aes(x = Sepal_cat, y = n/2, label = n)) +
+  coord_flip()
+```
+---
+# Gráfico de barras
+
+- Reordenando as barras
+```{r out.height = "50%", out.width = "50%"}
+iris_novo %>%
+  count(Sepal_cat) %>%
+  mutate(Sepal_cat = forcats::fct_reorder(Sepal_cat, n)) %>% ggplot() +
+  geom_col(aes(x = Sepal_cat, y = n, fill = Sepal_cat), show.legend = FALSE) +
+  geom_label(aes(x = Sepal_cat, y = n/2, label = n)) +
+  coord_flip()
+```
+
+
+---
+# Histogramas e boxplots
+- Histograma rápido
+```{r}
+iris %>% 
+  filter(Species == "setosa") %>%
+  ggplot() +
+  geom_histogram(aes(x = Sepal.Length))
+```
+
+---
+# Histogramas e boxplots
+- Fixando largura da banda
+```{r}
+iris %>% 
+  filter(Species == "setosa") %>%
+  ggplot() +
+  geom_histogram(aes(x = Sepal.Length), binwidth = 0.25, color = "white")
+```
+
+---
+# Histogramas e boxplots
+- Boxplots por Species
+```{r}
+iris %>% 
+  ggplot() +
+  geom_boxplot(aes(x = Species, y = Sepal.Length))
+```
+
+---
+# Histogramas e boxplots
+- Invertido
+```{r}
+iris %>% 
+  ggplot() +
+  geom_boxplot(aes(x = Species, y = Sepal.Length))+
+  coord_flip()
+```
+
+---
+# Títulos e labels
+```{r}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width, color = Species))+
+  labs(x = "Comprimento de Sépala", y = "Largura de Sépala",
+       color = "Espécies", title = "Gráfico de dispersão",
+       subtitle = "Largura x Comprimento de Sépala")
+```
+---
+# Escalas
+- Quebras (ticks) dos eixos x e y
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))+
+  scale_x_continuous(breaks = seq(4, 8, 0.5)) +
+  scale_y_continuous(breaks = seq(2, 4.5, 0.5))
+```
+
+---
+# Escalas
+- Alterando limites
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))+
+  scale_x_continuous(breaks = seq(4, 8, 0.5)) +
+  scale_y_continuous(breaks = seq(2, 4.5, 0.5)) + coord_cartesian(ylim = c(1, 6))
+```
+
+---
+# Escalas
+- Escalas de cores
+```{r out.width = "55%", out.height= "55%"}
+iris_novo %>%
+  count(Sepal_cat) %>%
+  ggplot() +
+  geom_col(aes(y = Sepal_cat, x = n, fill = Sepal_cat), show.legend = FALSE)+
+  scale_fill_manual(values = c("red", "blue", "green"))
+```
+
+---
+# Escalas
+- Gradientes
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width, color = Petal.Width))+
+  scale_color_gradient(low = "red", high = "green")
+```
+
+---
+# Escalas
+- Mudando nome de categorias
+```{r out.width = "55%", out.height= "55%"}
+iris_novo %>%
+  count(Sepal_cat) %>%
+  ggplot() +
+  geom_col(aes(y = Sepal_cat, x = n, fill = Sepal_cat))+
+  scale_fill_discrete(labels = c("Cat1", "Cat2", "Cat3"))
+```
+
+---
+# Temas
+- O tema usado até agora é o tema padrão do ggplot
+- Podemos mudar isso, usando por exemplo `theme_minimal()`
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))+
+  theme_minimal()
+```
+
+---
+# Temas
+- Tema em preto e branco `theme_bw()`
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))+
+  theme_bw()
+```
+
+---
+# Temas
+- Tema do R base `theme_classic()`
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))+
+  theme_classic()
+```
+
+---
+# Temas
+- Tema escuro`theme_dark()`
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))+
+  theme_minimal()
+```
+---
+# Juntando gráficos
+- Podemos adicionar varios `geoms` em um mesmo gráfico
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot(aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point()+
+  geom_smooth(se = FALSE, method = "lm")
+```
+
+---
+# Juntando gráficos
+- Paineis de acordo com variaveis categóricas
+```{r out.width = "55%", out.height= "55%"}
+iris %>%
+ggplot() +
+  geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width)) +
+  facet_wrap(~Species, ncol = 3)
+```
+---
+class: inverse, center, middle
+
+# Muito obrigado!
+
+---
+# Referências
+
+- [Livro da Curso-R, capítulos 6, 7 e 8](https://livro.curso-r.com/index.html)
+
+- [A tidyverse Cookbook](https://rstudio-education.github.io/tidyverse-cookbook/how-to-use-this-book.html#tidy-data)
+
+- [R for data science](https://r4ds.had.co.nz/tibbles.html)
