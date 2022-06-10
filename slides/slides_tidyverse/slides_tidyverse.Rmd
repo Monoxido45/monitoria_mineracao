@@ -806,7 +806,7 @@ ggplot() +
 iris %>%
 ggplot() +
   geom_point(mapping = aes(x = Sepal.Length, y = Sepal.Width))+
-  theme_minimal()
+  theme_dark()
 ```
 ---
 # Juntando gráficos
