@@ -1,0 +1,297 @@
+---
+title: "Dicas e bons costumes no R"
+author: "Luben Miguel"
+institute: "Universidade Federal de São Carlos"
+date: "15/07/2022"
+output:
+  xaringan::moon_reader:
+    chakra: libs/remark-latest.min.js  
+    css: xaringan-themer.css
+    lib_dir: libs
+    nature:
+      slideNumberFormat: "%current%"
+      highlightStyle: github
+      highlightLines: true
+      ratio: 16:9
+      countIncrementalSlides: true
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  fig.align = "center",
+  fig.height = 4, 
+  out.height = "60%",
+  out.width = "60%",
+  dpi = 500,
+  cache = FALSE,
+  echo = TRUE,
+  message = FALSE, 
+  warning = FALSE,
+  fig.show = TRUE,
+  hiline = TRUE
+)
+```
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_mono_accent(
+  base_color = "#1c5253",
+  header_font_google = google_font("Josefin Sans"),
+  text_font_google   = google_font("Montserrat", "300", "300i"),
+  code_font_google   = google_font("Fira Mono")
+)
+library(tidyverse)
+```
+
+# Objetos e suas classes
+
+--
+
+- O R te permite salvar valores dentro de um *objeto* 
+
+- *Objeto*: nome que guarda um valor.
+
+- Memória reservada para guardar valores
+
+--
+
+```{r}
+# objeto a que armazena o valor 1
+a <- 1
+
+# avaliando o objeto
+a
+```
+
+--
+
+- Algumas regrinhas para nomes:
+
+  - Começar com uma letra
+  
+  - Pode conter números mas não começar
+  
+  - Pode usar `.`e `_` para separar palavras
+  
+--
+
+---
+```{r eval = FALSE}
+# Permitido
+x <- 1
+x1 <- 2
+obj <- 3
+meu_obj <- 4
+meu.obj <- 5
+
+# Não permitido
+1x <- 1
+_objeto <- 2
+meu-objeto <- 3
+```
+
+--
+- O `R` também diferencia letras maiusculas de minúsculas
+```{r}
+b <- 2
+B <- 3
+b
+B
+```
+
+---
+## Classes e estruturas
+- Classes: dita qual o tipo de informação guardada no objeto
+
+--
+
+- Principais classes mais básicas:
+
+  - `numeric`
+  - `character`
+  - `logical`
+
+--
+```{r}
+x <- 1
+class(x)
+
+y <- "a"
+class(y)
+
+z <- TRUE
+class(z)
+```
+
+---
+## Classes e estruturas
+- Outras classes também usadas:
+  - `factor`
+  - `integer`
+  - `complex` 
+```{r}
+x <- factor(c("tipo1", "tipo2"))
+x
+class(x)
+
+y <- 12L
+class(y)
+```
+
+---
+## Classes e estruturas
+- Outros tipos de objetos/classes mais complexas:
+
+  - `vetores`
+  - `data frames`
+  - `listas`
+  - `matrizes`
+
+--
+
+```{r}
+a <- c(1, 2, 3)
+class(a)
+
+class(mtcars)
+
+b <- matrix(c(1, 2, 3, 4), nrow = 2, ncol = 2)
+class(b)
+```
+
+---
+## Vetores
+
+- Conjunto indexados de valores
+
+- Cada coluna de um data frame é um vetor
+
+- Operador `c()`
+
+--
+```{r}
+numeros <- c(1, 3, 7, -2)
+
+numeros
+
+letras <- c("a", "b", "c")
+
+letras
+```
+
+---
+## Vetores
+
+- Diversas maneiras de criar vetores.
+
+--
+
+- Usando o operador `:`
+```{r}
+# sequencia de 1 a 10
+1:10
+```
+--
+- Armazenando espaço para um vetor de certo tamanho
+
+```{r}
+# criando espaco para um vetor numerico de tamanho 10
+a <- numeric(10)
+a
+```
+--
+- Criar uma "grade" de valores
+```{r}
+grid <- seq(1, 3, 0.5)
+grid
+```
+---
+## Vetores
+
+- Cada valor dentro de um vetor tem uma posição
+
+- Indexação: acessar as posições de interesse
+
+```{r}
+vetor <- c("a", "b", "c", "d")
+
+# primeiro elemento
+vetor[1]
+
+# segundo elemento
+vetor[2]
+
+# fora de posicao
+vetor[5]
+```
+
+---
+## Vetores
+- Conjunto de indices entre `[]` (subsetting)
+
+```{r}
+# primeiro, segundo e quarto elemento
+vetor[c(1, 2, 4)]
+```
+
+--
+- Vetores apenas armazenam um tipo de classe:
+
+```{r}
+vetor1 <- c(1, 5, 3, -10)
+class(vetor1)
+
+vetor2 <- c("a", "b", "c")
+class(vetor2)
+```
+
+--- 
+
+---
+## Vetores
+- Misturar duas classes: *coerção*
+```{r}
+vetor <- c(1, 2, "a")
+vetor
+
+class(vetor)
+```
+
+--
+- Operações aritméticas com vetor:
+```{r}
+vetor <- c(0, 5, 20, -3)
+vetor + 1
+
+vetor - 1
+```
+
+---
+## Vetores
+- Operações aritméticas com vetor:
+```{r}
+vetor / 2
+
+vetor * 10
+
+# soma de dois vetores
+vetor1 <- c(1, 2, 3)
+vetor2 <- c(10, 20, 30)
+
+vetor1  + vetor2
+```
+---
+## Vetores
+- Operações aritméticas com vetor
+```{r}
+# soma de dois vetores de tamanho diferente (reciclagem)
+vetor1 <- c(1, 2)
+vetor2 <- c(10, 20, 30, 40)
+
+vetor1  + vetor2
+```
+
+---
+## Valores especiais
+
+
