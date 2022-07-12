@@ -218,6 +218,10 @@ class(b)
 ```
 
 ---
+class: inverse, center, middle
+
+# Vetores
+---
 ## Vetores
 
 - Conjunto indexados de valores
@@ -452,8 +456,499 @@ vetor1  + vetor2
 ## [1] 11 22 31 42
 ```
 
+
+```r
+# multiplicacao indice por indice e soma
+vetor1 &lt;- c(1, 2, 3)
+vetor2 &lt;- c(10, 20, 30)
+sum(vetor1*vetor2)
+```
+
+```
+## [1] 140
+```
+
+```r
+# multiplicação matricial
+vetor1 %*% vetor2
+```
+
+```
+##      [,1]
+## [1,]  140
+```
+
+---
+## Vetores
+- Testes lógicos em vetores
+
+```r
+valores &lt;- c(1, 2, 5, 8, 10, 12, -1)
+
+# vetor de booleana
+valores &gt; 3
+```
+
+```
+## [1] FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE
+```
+
+```r
+# selecionando valores maiores que 3 por subsetting
+valores[valores &gt; 3]
+```
+
+```
+## [1]  5  8 10 12
+```
+---
+## Vetores
+- Grande parte dos operadores e funções do R são vetorizados
+
+- Utilização da reciclagem
+
+
+```r
+set.seed(125)
+# gerando uniformes com diferentes maximos e minimos aproveitando da reciclagem
+runif(6, min = c(-1 ,1), max = c(1, 2))
+```
+
+```
+## [1]  0.6493488  1.1168510 -0.4004389  1.3565607  0.9303900  1.9675605
+```
+- Podemos também aumentar vetores usando o operador `c()`, ainda que subótimo (não é boa prática)
+
+```r
+a &lt;- c(10, 20, 30)
+a &lt;- c(a, 40)
+a
+```
+
+```
+## [1] 10 20 30 40
+```
+
+---
+class: inverse, center, middle
+
+# Valores especiais
 ---
 ## Valores especiais
+- `NA`: Ausência de informação, *"missing"*
+
+- `NaN`: Indefinições matematicas
+
+- `Inf`: Número muito grande
+
+- `NULL`: ausência de objeto
+
+- Para checar se um objeto é algum dos valores especiais podemos usar funções do tipo `is.na()`, `is.nan()`, `is.null()` e assim por diante
+
+
+```r
+nao_sou_um_numero &lt;- NaN
+objeto_nulo &lt;- NULL
+
+is.nan(nao_sou_um_numero)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.null(objeto_nulo)
+```
+
+```
+## [1] TRUE
+```
+
+---
+class: inverse, center, middle
+
+# Listas
+---
+## Listas
+- Parecida com vetores
+
+--
+
+- Diferença: pode misturar diferentes classes de objetos dentro dela.
+
+
+```r
+list(1,
+     "a",
+     TRUE,
+     c(1, 2),
+     c("1", "2"))
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] "a"
+## 
+## [[3]]
+## [1] TRUE
+## 
+## [[4]]
+## [1] 1 2
+## 
+## [[5]]
+## [1] "1" "2"
+```
+
+---
+## Listas
+
+- Subsetting diferente de vetores
+
+- Cada elemento de uma lista também é uma lista
+
+
+```r
+lista &lt;- list(1, "a", TRUE)
+lista[1]
+```
+
+```
+## [[1]]
+## [1] 1
+```
+
+```r
+class(lista[1])
+```
+
+```
+## [1] "list"
+```
+
+---
+## Listas
+
+- Usar `[[]]` para acessar o elemento de cada posição
+
+
+```r
+lista[[1]]
+```
+
+```
+## [1] 1
+```
+
+```r
+class(lista[[1]])
+```
+
+```
+## [1] "numeric"
+```
+
+---
+## Listas
+
+- Podemos dar nome para cada posição
+
+```r
+cliente &lt;- list(cliente = "Pedro Silva", idade = 24, estado_civil = NA)
+cliente
+```
+
+```
+## $cliente
+## [1] "Pedro Silva"
+## 
+## $idade
+## [1] 24
+## 
+## $estado_civil
+## [1] NA
+```
+
+- Quando com nomes, podemos acessar cada posição usando o operador `$`
+
+```r
+cliente$idade
+```
+
+```
+## [1] 24
+```
+
+- **Todo data.frame é uma lista**
+
+---
+## Listas
+- Estrutura de dados muito flexivel
+
+- Podemos aumentar o tamanho de listas e adicionar novos elementos, desde que indexado corretamente
+
+
+```r
+cliente$salario = 4000
+cliente
+```
+
+```
+## $cliente
+## [1] "Pedro Silva"
+## 
+## $idade
+## [1] 24
+## 
+## $estado_civil
+## [1] NA
+## 
+## $salario
+## [1] 4000
+```
+
+--- 
+---
+## Listas
+- Podemos também usar a função `append()` do R
+
+
+```r
+append(lista, "d")
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] "a"
+## 
+## [[3]]
+## [1] TRUE
+## 
+## [[4]]
+## [1] "d"
+```
+---
+class: inverse, center, middle
+
+# Data Frames
+
+---
+## Data Frames
+
+- Tudo que vale para uma lista vale para um Data Frame
+
+- Podemos usar o operador `$` para selecionar uma coluna dos dados (vetor)
+
+
+```r
+mtcars$mpg
+```
+
+```
+##  [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4
+## [16] 10.4 14.7 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7
+## [31] 15.0 21.4
+```
+
+---
+## Data Frames
+
+- Se selecionar por subsetting, o elemento também será um data.frame
+
+
+```r
+mtcars[1]
+```
+
+```
+##                      mpg
+## Mazda RX4           21.0
+## Mazda RX4 Wag       21.0
+## Datsun 710          22.8
+## Hornet 4 Drive      21.4
+## Hornet Sportabout   18.7
+## Valiant             18.1
+## Duster 360          14.3
+## Merc 240D           24.4
+## Merc 230            22.8
+## Merc 280            19.2
+## Merc 280C           17.8
+## Merc 450SE          16.4
+## Merc 450SL          17.3
+## Merc 450SLC         15.2
+## Cadillac Fleetwood  10.4
+## Lincoln Continental 10.4
+## Chrysler Imperial   14.7
+## Fiat 128            32.4
+## Honda Civic         30.4
+## Toyota Corolla      33.9
+## Toyota Corona       21.5
+## Dodge Challenger    15.5
+## AMC Javelin         15.2
+## Camaro Z28          13.3
+## Pontiac Firebird    19.2
+## Fiat X1-9           27.3
+## Porsche 914-2       26.0
+## Lotus Europa        30.4
+## Ford Pantera L      15.8
+## Ferrari Dino        19.7
+## Maserati Bora       15.0
+## Volvo 142E          21.4
+```
+
+---
+## Data Frames
+
+- Tipo específico de lista:
+
+--
+
+  - Todos os seus elementos (colunas) precisam ter o mesmo comprimento (número de linhas).
+  
+--
+
+  - Todos os seus elementos (colunas) precisam ser nomeados
+  
+--
+
+  - Data frames têm 2 dimensões (linhas e colunas)
+
+
+```r
+dados_cliente &lt;- list(
+  cliente = c("Pedro Silva", "Vitor Pereira", "Carla Souza"),
+  idade = c(24, 28, 21),
+  estado_civil = c(NA, "Solteiro", "Casada")
+)
+
+as.data.frame(dados_cliente)
+```
+
+```
+##         cliente idade estado_civil
+## 1   Pedro Silva    24         &lt;NA&gt;
+## 2 Vitor Pereira    28     Solteiro
+## 3   Carla Souza    21       Casada
+```
+
+---
+## Data Frames
+
+- Terceira propriedade: Data frames retangulares
+
+```r
+dim(mtcars)
+```
+
+```
+## [1] 32 11
+```
+
+- Usar dois indices para realizar subsetting
+
+
+```r
+# observacao 2 e variavel disp
+mtcars[2, 3]
+```
+
+```
+## [1] 160
+```
+
+---
+## Data Frames
+
+- Usar dois indices para realizar subsetting
+
+```r
+# todas as linhas da coluna 1
+mtcars[, 1]
+```
+
+```
+##  [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4
+## [16] 10.4 14.7 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7
+## [31] 15.0 21.4
+```
+
+```r
+# todas as colunas da linha 1
+mtcars[1, ]
+```
+
+```
+##           mpg cyl disp  hp drat   wt  qsec vs am gear carb
+## Mazda RX4  21   6  160 110  3.9 2.62 16.46  0  1    4    4
+```
+
+---
+## Data Frames
+
+- Subsetting e operadores lógicos semelhante ao de vetores
+
+
+```r
+# selecionando as linhas 1,2 e 4
+mtcars[c(1, 2, 4), ]
+```
+
+```
+##                 mpg cyl disp  hp drat    wt  qsec vs am gear carb
+## Mazda RX4      21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+## Mazda RX4 Wag  21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+## Hornet 4 Drive 21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+```
+
+```r
+# vetor logico indicando as linhas que o numero de cilindros eh 4
+mtcars$cyl == 4
+```
+
+```
+##  [1] FALSE FALSE  TRUE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE
+## [13] FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
+## [25] FALSE  TRUE  TRUE  TRUE FALSE FALSE FALSE  TRUE
+```
+
+
+---
+## Data Frames
+
+- Subsetting e operadores lógicos semelhante ao de vetores
+
+```r
+mtcars[mtcars$cyl == 4, ]
+```
+
+```
+##                 mpg cyl  disp  hp drat    wt  qsec vs am gear carb
+## Datsun 710     22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1
+## Merc 240D      24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2
+## Merc 230       22.8   4 140.8  95 3.92 3.150 22.90  1  0    4    2
+## Fiat 128       32.4   4  78.7  66 4.08 2.200 19.47  1  1    4    1
+## Honda Civic    30.4   4  75.7  52 4.93 1.615 18.52  1  1    4    2
+## Toyota Corolla 33.9   4  71.1  65 4.22 1.835 19.90  1  1    4    1
+## Toyota Corona  21.5   4 120.1  97 3.70 2.465 20.01  1  0    3    1
+## Fiat X1-9      27.3   4  79.0  66 4.08 1.935 18.90  1  1    4    1
+## Porsche 914-2  26.0   4 120.3  91 4.43 2.140 16.70  0  1    5    2
+## Lotus Europa   30.4   4  95.1 113 3.77 1.513 16.90  1  1    5    2
+## Volvo 142E     21.4   4 121.0 109 4.11 2.780 18.60  1  1    4    2
+```
+
+---
+class: inverse, center, middle
+
+# Bons costumes e algumas correções
+
+---
+
 
 
     </textarea>

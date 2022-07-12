@@ -160,6 +160,10 @@ class(b)
 ```
 
 ---
+class: inverse, center, middle
+
+# Vetores
+---
 ## Vetores
 
 - Conjunto indexados de valores
@@ -291,7 +295,259 @@ vetor2 <- c(10, 20, 30, 40)
 vetor1  + vetor2
 ```
 
+```{r}
+# multiplicacao indice por indice e soma
+vetor1 <- c(1, 2, 3)
+vetor2 <- c(10, 20, 30)
+sum(vetor1*vetor2)
+
+# multiplicação matricial
+vetor1 %*% vetor2
+```
+
+---
+## Vetores
+- Testes lógicos em vetores
+```{r}
+valores <- c(1, 2, 5, 8, 10, 12, -1)
+
+# vetor de booleana
+valores > 3
+
+# selecionando valores maiores que 3 por subsetting
+valores[valores > 3]
+```
+---
+## Vetores
+- Grande parte dos operadores e funções do R são vetorizados
+
+- Utilização da reciclagem
+
+```{r}
+set.seed(125)
+# gerando uniformes com diferentes maximos e minimos aproveitando da reciclagem
+runif(6, min = c(-1 ,1), max = c(1, 2))
+```
+- Podemos também aumentar vetores usando o operador `c()`, ainda que subótimo (não é boa prática)
+```{r}
+a <- c(10, 20, 30)
+a <- c(a, 40)
+a
+```
+
+---
+class: inverse, center, middle
+
+# Valores especiais
 ---
 ## Valores especiais
+- `NA`: Ausência de informação, *"missing"*
+
+- `NaN`: Indefinições matematicas
+
+- `Inf`: Número muito grande
+
+- `NULL`: ausência de objeto
+
+- Para checar se um objeto é algum dos valores especiais podemos usar funções do tipo `is.na()`, `is.nan()`, `is.null()` e assim por diante
+
+```{r}
+nao_sou_um_numero <- NaN
+objeto_nulo <- NULL
+
+is.nan(nao_sou_um_numero)
+
+is.null(objeto_nulo)
+```
+
+---
+class: inverse, center, middle
+
+# Listas
+---
+## Listas
+- Parecida com vetores
+
+--
+
+- Diferença: pode misturar diferentes classes de objetos dentro dela.
+
+```{r}
+list(1,
+     "a",
+     TRUE,
+     c(1, 2),
+     c("1", "2"))
+```
+
+---
+## Listas
+
+- Subsetting diferente de vetores
+
+- Cada elemento de uma lista também é uma lista
+
+```{r}
+lista <- list(1, "a", TRUE)
+lista[1]
+
+class(lista[1])
+```
+
+---
+## Listas
+
+- Usar `[[]]` para acessar o elemento de cada posição
+
+```{r}
+lista[[1]]
+class(lista[[1]])
+```
+
+---
+## Listas
+
+- Podemos dar nome para cada posição
+```{r}
+cliente <- list(cliente = "Pedro Silva", idade = 24, estado_civil = NA)
+cliente
+```
+
+- Quando com nomes, podemos acessar cada posição usando o operador `$`
+```{r}
+cliente$idade
+```
+
+- **Todo data.frame é uma lista**
+
+---
+## Listas
+- Estrutura de dados muito flexivel
+
+- Podemos aumentar o tamanho de listas e adicionar novos elementos, desde que indexado corretamente
+
+```{r}
+cliente$salario = 4000
+cliente
+
+```
+
+--- 
+---
+## Listas
+- Podemos também usar a função `append()` do R
+
+```{r}
+append(lista, "d")
+```
+---
+class: inverse, center, middle
+
+# Data Frames
+
+---
+## Data Frames
+
+- Tudo que vale para uma lista vale para um Data Frame
+
+- Podemos usar o operador `$` para selecionar uma coluna dos dados (vetor)
+
+```{r}
+mtcars$mpg
+```
+
+---
+## Data Frames
+
+- Se selecionar por subsetting, o elemento também será um data.frame
+
+```{r}
+mtcars[1]
+```
+
+---
+## Data Frames
+
+- Tipo específico de lista:
+
+--
+
+  - Todos os seus elementos (colunas) precisam ter o mesmo comprimento (número de linhas).
+  
+--
+
+  - Todos os seus elementos (colunas) precisam ser nomeados
+  
+--
+
+  - Data frames têm 2 dimensões (linhas e colunas)
+
+```{r}
+dados_cliente <- list(
+  cliente = c("Pedro Silva", "Vitor Pereira", "Carla Souza"),
+  idade = c(24, 28, 21),
+  estado_civil = c(NA, "Solteiro", "Casada")
+)
+
+as.data.frame(dados_cliente)
+```
+
+---
+## Data Frames
+
+- Terceira propriedade: Data frames retangulares
+```{r}
+dim(mtcars)
+```
+
+- Usar dois indices para realizar subsetting
+
+```{r}
+# observacao 2 e variavel disp
+mtcars[2, 3]
+```
+
+---
+## Data Frames
+
+- Usar dois indices para realizar subsetting
+```{r}
+# todas as linhas da coluna 1
+mtcars[, 1]
+
+# todas as colunas da linha 1
+mtcars[1, ]
+```
+
+---
+## Data Frames
+
+- Subsetting e operadores lógicos semelhante ao de vetores
+
+```{r}
+# selecionando as linhas 1,2 e 4
+mtcars[c(1, 2, 4), ]
+
+
+# vetor logico indicando as linhas que o numero de cilindros eh 4
+mtcars$cyl == 4
+```
+
+
+---
+## Data Frames
+
+- Subsetting e operadores lógicos semelhante ao de vetores
+```{r}
+mtcars[mtcars$cyl == 4, ]
+```
+
+---
+class: inverse, center, middle
+
+# Bons costumes e algumas correções
+
+---
+
 
 
