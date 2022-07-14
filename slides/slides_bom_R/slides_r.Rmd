@@ -548,6 +548,249 @@ class: inverse, center, middle
 # Bons costumes e algumas correções
 
 ---
+## Importação dos dados
+
+- Maus costumes:
+
+  - Usar setwd para setar diretório da lista/dos dados
+  
+  - Usar path específico dos dados
+```{r eval = FALSE}
+# maus costumes
+setwd("/home/kuben/estatistica_UFSCAR/Doutorado/monitoria_mineracao/slides/slides_bom_R")
+
+dados <- fread("/home/kuben/estatistica_UFSCAR/Doutorado/monitoria_mineracao/slides/slides_bom_R/worldDevelopmentIndicators.csv", header = TRUE)
+```
+--
+- Bons costumes:
+
+  - Ler dados diretamente do site
+  
+  - Criar rproj, nao precisando de path muito pessoal
+```{r eval = FALSE}
+# bons costumes
+dados <- read.delim("http://www.rizbicki.ufscar.br/dados/worldDevelopmentIndicator
+s.csv",header = T, sep=",")
+
+dados <- readr::read_csv("worldDevelopmentIndicators.csv")
+# pode usar fread com esse path tambem
+```
+```{r echo = FALSE}
+# transformando os dados tambem
+dados <- readr::read_csv("worldDevelopmentIndicators.csv")
+dados <- dados |> select(-CountryName) |>
+rename(y = LifeExpectancy, x = GDPercapita) |>
+mutate(x = (x-min(x))/(max(x)-min(x)))
+```
+
+---
+## Transformação dos dados
+
+- Maus costumes:
+  - Criar diversos objetos para manipulação dos dados
+  
+  - Mais de 1 data.frame
+  
+```{r eval = FALSE}
+# depois de importar os dados
+y <- dados$LifeExpectancy
+
+x <- (dados$GDPercapita - min(dados$GDPercapita))/(max(dados$GDPercapita)-
+min(dados$GDPercapita))
+
+df <- data.frame(y, x)
+```
+
+- Bons costumes:
+
+  - Transformar e utilizar os dados já importados
+  
+  - Fazer todas as transformações no próprio data.frame
+
+---
+## Transformação dos dados
+```{r}
+# usando tidyverse
+dados <- readr::read_csv("worldDevelopmentIndicators.csv") |> select(-CountryName) |>
+rename(y = LifeExpectancy, x = GDPercapita) |>
+mutate(x = (x-min(x))/(max(x)-min(x)))
+
+dados |>
+glimpse()
+```
+```{r}
+# sem tidyverse
+dados <- data.table::fread("worldDevelopmentIndicators.csv", header = TRUE)
+dados <- dados[, -1]
+colnames(dados) <- c("y", "x")
+dados$x <- (dados$x-min(dados$x))/(max(dados$x)-min(dados$x))
+head(dados, 2)
+```
+
+---
+## Criar objetos para armazenamento e laço
+- Maus costumes:
+  - Usar `c()`
+  - Usar `NULL`
+  - Usar `rep(NA, n)`
+  - Hardcoding nos laços e variaveis
+```{r eval = FALSE}
+for(j in 1:211){
+  ...
+}
+
+preditos <- matrix(0, nrow=211, ncol=30)
+formulas <-  NULL
+risco <- rep(NA, 30)
+```
+--
+- Bons costumes:
+  - Usar `numeric(n)`
+  - Usar `list()`
+  - Utilizar indices genéricos
+
+---
+## Laço do exercicio 2
+```{r}
+p <- 30
+str <- "y ~ "
+formulas <- list()
+risco <- numeric(p)
+
+for(j in 1:p){
+  erro_temp <- numeric(nrow(dados))
+  str <- paste0(str, "sin(2*", j, "*pi*x) + cos(2*", j, "*pi*x)")
+  formulas[[j]] <- str
+    for(i in 1:nrow(dados)){
+    mod <- lm(formulas[[j]], data = dados[-i, ])
+    erro_temp[i] <- abs(dados$y[i] - predict(mod, dados[i, ]))
+  }
+  risco[j] <- mean(erro_temp)
+  str <- paste0(str, " + ")
+}
+
+results <- data.frame(p = 1:p, MAE = risco)
+glimpse(results)
+```
+```{r echo = FALSE}
+pesc <- which.min(results$MAE)
+```
+---
+## Gerar gráficos de curvas
+
+- Maus costumes:
+
+  - Usar varios data.frames para gerar um gráfico
+  
+  - Não ajustar limites
+  
+  - Usar `geom_line()` nas bases diferentes
+  
+```{r eval = FALSE}
+...
+ggplot() +
+geom_point(mapping= aes(x=xnorm,y=Y),data=dados_norm)+
+geom_line(mapping = aes(x=grade,
+                        y=pred1, colour = "p = 1"), data= dados_predito)
++ ...
+```
+
+--
+- Bons costumes:
+
+  - Utilizar uma única base para gerar o gráfico
+  
+  - Usar `coord_cartesian()`
+  
+  - Funções como `geom_smooth()` e `stat_function()` na mesma base
+  
+---
+## Gerar gráfico de curvas
+
+```{r out.width = "45%", out.height= "45%"}
+dados |>
+  ggplot(aes(x = x, y = y))+
+  geom_point(alpha = 0.4) +
+  geom_smooth(aes(color = "p=1"),method = 'lm', se = FALSE, formula = formulas[[1]]) +
+  geom_smooth(aes(color = "p=5"),method = 'lm',se = FALSE, formula = formulas[[5]]) +
+  geom_smooth(aes(color = "p=30"),method = 'lm', se = FALSE, formula = formulas[[30]]) +
+  coord_cartesian(ylim = c(min(dados$y) - 5, max(dados$y) + 5))+
+  scale_color_brewer(palette = "Set1", breaks = c("p=1", "p=5", "p=30")) +
+  labs(color = 'Valor de P', x = 'PIB per capita normalizado',y = 'Expectativa de Vida', 
+       title = 'Curvas ajustadas para p = 1, 5 e 30')
+```
+
+---
+## Gráfico de valores preditos versus observados
+- Maus costumes:
+
+  - Fazer gráficos separados 
+  
+  - Usar a mesma escala no eixo de preditos
+  
+  - Hardcoding na criação da base para plotagem
+  
+--
+
+- Bons costumes:
+
+  - Fazer gráficos em facets
+  
+  - Usar diretamente a base de dados inicial
+  
+  - Organizar as informações em um mesmo data frame
+  
+---
+## Gráfico de valores preditos versus observados
+- Criando a base que sera usada para gerar o grafico
+```{r}
+# funcao para juntar tudo
+idxs <- c(1, 5, 30)
+for(id in idxs){
+  pred <- numeric(nrow(dados))
+  for(i in 1:nrow(dados)){
+    mod <- lm(formulas[[id]], data = dados[-i, ])
+    pred[i] <- predict(mod, dados[i, ])
+  }
+  var_name <- paste0("p = ", id)
+  dados <- dados |>
+    mutate({{var_name}} := pred)
+  # usando rbase : dados[var_name] <- pred
+}
+dados |> glimpse()
+```
+---
+## Gráfico de valores preditos versus observados
+- "Derretendo" os dados e gerando a tabela para plotar em facets
+```{r}
+dados_plot <- dados |> pivot_longer(`p = 1`:`p = 30`, names_to = "p",
+                                    values_to = "pred")
+dados_plot |> glimpse()
+```
+---
+## Gráfico de valores preditos versus observados
+```{r out.width = "55%", out.height= "55%"}
+dados_plot |> 
+  mutate(p = factor(p, levels = c("p = 1", "p = 5", "p = 30"))) |>
+  ggplot(aes(x = pred, y = y))+
+  geom_point()+
+  geom_abline(intercept =0 , slope = 1, size=1, linetype = "dashed", colour = "red")+
+  facet_wrap(vars(p), ncol = 3, scales = "free_x")+
+  labs(title = "Predito versus observados para cada p", x = "Predito", y = "Observado")
+```
+
+---
+class: inverse, center, middle
+
+# Muito obrigado!
+
+
+---
+# Referências
+
+- [Livro da Curso-R, capítulo 3](https://livro.curso-r.com/index.html)
+
+- [tutorialspoint - Learn R Programming](https://www.tutorialspoint.com/r/r_data_types.htm)
 
 
 

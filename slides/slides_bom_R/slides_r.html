@@ -948,6 +948,296 @@ class: inverse, center, middle
 # Bons costumes e algumas correções
 
 ---
+## Importação dos dados
+
+- Maus costumes:
+
+  - Usar setwd para setar diretório da lista/dos dados
+  
+  - Usar path específico dos dados
+
+```r
+# maus costumes
+setwd("/home/kuben/estatistica_UFSCAR/Doutorado/monitoria_mineracao/slides/slides_bom_R")
+
+dados &lt;- fread("/home/kuben/estatistica_UFSCAR/Doutorado/monitoria_mineracao/slides/slides_bom_R/worldDevelopmentIndicators.csv", header = TRUE)
+```
+--
+- Bons costumes:
+
+  - Ler dados diretamente do site
+  
+  - Criar rproj, nao precisando de path muito pessoal
+
+```r
+# bons costumes
+dados &lt;- read.delim("http://www.rizbicki.ufscar.br/dados/worldDevelopmentIndicator
+s.csv",header = T, sep=",")
+
+dados &lt;- readr::read_csv("worldDevelopmentIndicators.csv")
+# pode usar fread com esse path tambem
+```
+
+
+---
+## Transformação dos dados
+
+- Maus costumes:
+  - Criar diversos objetos para manipulação dos dados
+  
+  - Mais de 1 data.frame
+  
+
+```r
+# depois de importar os dados
+y &lt;- dados$LifeExpectancy
+
+x &lt;- (dados$GDPercapita - min(dados$GDPercapita))/(max(dados$GDPercapita)-
+min(dados$GDPercapita))
+
+df &lt;- data.frame(y, x)
+```
+
+- Bons costumes:
+
+  - Transformar e utilizar os dados já importados
+  
+  - Fazer todas as transformações no próprio data.frame
+
+---
+## Transformação dos dados
+
+```r
+# usando tidyverse
+dados &lt;- readr::read_csv("worldDevelopmentIndicators.csv") |&gt; select(-CountryName) |&gt;
+rename(y = LifeExpectancy, x = GDPercapita) |&gt;
+mutate(x = (x-min(x))/(max(x)-min(x)))
+
+dados |&gt;
+glimpse()
+```
+
+```
+## Rows: 211
+## Columns: 2
+## $ y &lt;dbl&gt; 60.50912, 51.46400, 77.35046, 69.94970, 76.95788, 76.01268, 74.43722…
+## $ x &lt;dbl&gt; 0.004210438, 0.050492852, 0.036183948, 0.071037163, 0.399979495, 0.1…
+```
+
+```r
+# sem tidyverse
+dados &lt;- data.table::fread("worldDevelopmentIndicators.csv", header = TRUE)
+dados &lt;- dados[, -1]
+colnames(dados) &lt;- c("y", "x")
+dados$x &lt;- (dados$x-min(dados$x))/(max(dados$x)-min(dados$x))
+head(dados, 2)
+```
+
+```
+##           y           x
+## 1: 60.50912 0.004210438
+## 2: 51.46400 0.050492852
+```
+
+---
+## Criar objetos para armazenamento e laço
+- Maus costumes:
+  - Usar `c()`
+  - Usar `NULL`
+  - Usar `rep(NA, n)`
+  - Hardcoding nos laços e variaveis
+
+```r
+for(j in 1:211){
+  ...
+}
+
+preditos &lt;- matrix(0, nrow=211, ncol=30)
+formulas &lt;-  NULL
+risco &lt;- rep(NA, 30)
+```
+--
+- Bons costumes:
+  - Usar `numeric(n)`
+  - Usar `list()`
+  - Utilizar indices genéricos
+
+---
+## Laço do exercicio 2
+
+```r
+p &lt;- 30
+str &lt;- "y ~ "
+formulas &lt;- list()
+risco &lt;- numeric(p)
+
+for(j in 1:p){
+  erro_temp &lt;- numeric(nrow(dados))
+  str &lt;- paste0(str, "sin(2*", j, "*pi*x) + cos(2*", j, "*pi*x)")
+  formulas[[j]] &lt;- str
+    for(i in 1:nrow(dados)){
+    mod &lt;- lm(formulas[[j]], data = dados[-i, ])
+    erro_temp[i] &lt;- abs(dados$y[i] - predict(mod, dados[i, ]))
+  }
+  risco[j] &lt;- mean(erro_temp)
+  str &lt;- paste0(str, " + ")
+}
+
+results &lt;- data.frame(p = 1:p, MAE = risco)
+glimpse(results)
+```
+
+```
+## Rows: 30
+## Columns: 2
+## $ p   &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,…
+## $ MAE &lt;dbl&gt; 5.449510e+00, 5.096368e+00, 4.734910e+00, 4.705431e+00, 4.568074e+…
+```
+
+---
+## Gerar gráficos de curvas
+
+- Maus costumes:
+
+  - Usar varios data.frames para gerar um gráfico
+  
+  - Não ajustar limites
+  
+  - Usar `geom_line()` nas bases diferentes
+  
+
+```r
+...
+ggplot() +
+geom_point(mapping= aes(x=xnorm,y=Y),data=dados_norm)+
+geom_line(mapping = aes(x=grade,
+                        y=pred1, colour = "p = 1"), data= dados_predito)
++ ...
+```
+
+--
+- Bons costumes:
+
+  - Utilizar uma única base para gerar o gráfico
+  
+  - Usar `coord_cartesian()`
+  
+  - Funções como `geom_smooth()` e `stat_function()` na mesma base
+  
+---
+## Gerar gráfico de curvas
+
+
+```r
+dados |&gt;
+  ggplot(aes(x = x, y = y))+
+  geom_point(alpha = 0.4) +
+  geom_smooth(aes(color = "p=1"),method = 'lm', se = FALSE, formula = formulas[[1]]) +
+  geom_smooth(aes(color = "p=5"),method = 'lm',se = FALSE, formula = formulas[[5]]) +
+  geom_smooth(aes(color = "p=30"),method = 'lm', se = FALSE, formula = formulas[[30]]) +
+  coord_cartesian(ylim = c(min(dados$y) - 5, max(dados$y) + 5))+
+  scale_color_brewer(palette = "Set1", breaks = c("p=1", "p=5", "p=30")) +
+  labs(color = 'Valor de P', x = 'PIB per capita normalizado',y = 'Expectativa de Vida', 
+       title = 'Curvas ajustadas para p = 1, 5 e 30')
+```
+
+&lt;img src="slides_r_files/figure-html/unnamed-chunk-48-1.png" width="45%" height="45%" style="display: block; margin: auto;" /&gt;
+
+---
+## Gráfico de valores preditos versus observados
+- Maus costumes:
+
+  - Fazer gráficos separados 
+  
+  - Usar a mesma escala no eixo de preditos
+  
+  - Hardcoding na criação da base para plotagem
+  
+--
+
+- Bons costumes:
+
+  - Fazer gráficos em facets
+  
+  - Usar diretamente a base de dados inicial
+  
+  - Organizar as informações em um mesmo data frame
+  
+---
+## Gráfico de valores preditos versus observados
+- Criando a base que sera usada para gerar o grafico
+
+```r
+# funcao para juntar tudo
+idxs &lt;- c(1, 5, 30)
+for(id in idxs){
+  pred &lt;- numeric(nrow(dados))
+  for(i in 1:nrow(dados)){
+    mod &lt;- lm(formulas[[id]], data = dados[-i, ])
+    pred[i] &lt;- predict(mod, dados[i, ])
+  }
+  var_name &lt;- paste0("p = ", id)
+  dados &lt;- dados |&gt;
+    mutate({{var_name}} := pred)
+  # usando rbase : dados[var_name] &lt;- pred
+}
+dados |&gt; glimpse()
+```
+
+```
+## Rows: 211
+## Columns: 5
+## $ y        &lt;dbl&gt; 60.50912, 51.46400, 77.35046, 69.94970, 76.95788, 76.01268, 7…
+## $ x        &lt;dbl&gt; 0.004210438, 0.050492852, 0.036183948, 0.071037163, 0.3999794…
+## $ `p = 1`  &lt;dbl&gt; 65.78438, 67.90199, 67.04082, 68.86715, 83.07883, 71.00311, 6…
+## $ `p = 5`  &lt;dbl&gt; 62.05453, 70.37214, 67.36707, 73.12910, 81.28311, 75.08048, 6…
+## $ `p = 30` &lt;dbl&gt; 5.913882e+01, 7.054834e+01, 7.340779e+01, 6.908822e+01, 8.387…
+```
+---
+## Gráfico de valores preditos versus observados
+- "Derretendo" os dados e gerando a tabela para plotar em facets
+
+```r
+dados_plot &lt;- dados |&gt; pivot_longer(`p = 1`:`p = 30`, names_to = "p",
+                                    values_to = "pred")
+dados_plot |&gt; glimpse()
+```
+
+```
+## Rows: 633
+## Columns: 4
+## $ y    &lt;dbl&gt; 60.50912, 60.50912, 60.50912, 51.46400, 51.46400, 51.46400, 77.35…
+## $ x    &lt;dbl&gt; 0.004210438, 0.004210438, 0.004210438, 0.050492852, 0.050492852, …
+## $ p    &lt;chr&gt; "p = 1", "p = 5", "p = 30", "p = 1", "p = 5", "p = 30", "p = 1", …
+## $ pred &lt;dbl&gt; 65.78438, 62.05453, 59.13882, 67.90199, 70.37214, 70.54834, 67.04…
+```
+---
+## Gráfico de valores preditos versus observados
+
+```r
+dados_plot |&gt; 
+  mutate(p = factor(p, levels = c("p = 1", "p = 5", "p = 30"))) |&gt;
+  ggplot(aes(x = pred, y = y))+
+  geom_point()+
+  geom_abline(intercept =0 , slope = 1, size=1, linetype = "dashed", colour = "red")+
+  facet_wrap(vars(p), ncol = 3, scales = "free_x")+
+  labs(title = "Predito versus observados para cada p", x = "Predito", y = "Observado")
+```
+
+&lt;img src="slides_r_files/figure-html/unnamed-chunk-51-1.png" width="55%" height="55%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, center, middle
+
+# Muito obrigado!
+
+
+---
+# Referências
+
+- [Livro da Curso-R, capítulo 3](https://livro.curso-r.com/index.html)
+
+- [tutorialspoint - Learn R Programming](https://www.tutorialspoint.com/r/r_data_types.htm)
 
 
 
